@@ -1,16 +1,15 @@
-import { useState } from 'react'
-import './App.css'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
+import { Route, BrowserRouter as Router, Routes } from 'react-router-dom';
+import './App.css';
 
 function App() {
-  const [count, setCount] = useState(0)
-
-  return (
-    <>
-      <h1 className="text-3xl text-blue-300">Karthik</h1>
-    </>
-  )
+    
+	return (
+		<Router>
+			<Routes>
+				<Route path="/" />
+			</Routes>
+		</Router>
+	);
 }
 
-export default App
+export default App;
