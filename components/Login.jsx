@@ -1,8 +1,14 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Login() {
+
+    useEffect(() => {
+        if (localStorage.getItem('user')) {
+            window.location.href = '/dashboard';
+        }
+    }, []);
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
@@ -67,7 +73,7 @@ export default function Login() {
                 </div>
                 <button type="submit" onClick={handleSubmit} className='w-auto h-auto px-8 py-3 bg-slate-200 rounded-lg uppercase font-semibold'>Login</button>
                 <div className='mt-3 mb-3 w-full h-[1px] bg-slate-200'></div>
-                <p className='text-slate-200'>Don't have an account?</p>
+                <p className='text-slate-200'>Don&apos;t have an account?</p>
                 <Link className='text-slate-200 text-lg underline underline-offset-8' to="/register">Register</Link>
             </div>
         </div>

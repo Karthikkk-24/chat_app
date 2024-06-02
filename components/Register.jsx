@@ -1,8 +1,14 @@
 import axios from 'axios';
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
 export default function Register() {
+
+    useEffect(() => {
+        if (localStorage.getItem('user')) {
+            window.location.href = '/dashboard';
+        }
+    }, []);
 
     const [username, setUsername] = useState('');
     const [email, setEmail] = useState('');
