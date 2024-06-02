@@ -2,12 +2,13 @@ import axios from 'axios';
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 
+
 export default function Login() {
 
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = async() => {
+    const handleSubmit = async () => {
         try {
             const response = await axios.post('http://localhost:3000/api/auth/login', {
                 email,
@@ -17,16 +18,14 @@ export default function Login() {
             console.log(response.data);
 
             if (response.status === 200) {
-                console.log(response.data);
-                localStorage.clear();
+                // window.location.href = '/dashboard';
                 localStorage.setItem('user', response.data.token);
-                window.location.href = '/dashboard';
             }
 
         } catch (error) {
             console.log(error);
         }
-    }
+    };
 
 
     return (
@@ -47,8 +46,7 @@ export default function Login() {
                         id="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
-                        className="w-full h-12 pl-3 border-2 rounded-lg border-slate-100 text-lg text-slate-200 bg-slate-900"
-                    />
+                        className="w-full h-12 pl-3 border-2 rounded-lg border-slate-100 text-lg text-slate-200 bg-slate-900" />
                 </div>
                 <div className="flex flex-col items-start justify-start gap-1 w-full">
                     <label
@@ -62,8 +60,7 @@ export default function Login() {
                         id="password"
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
-                        className="w-full h-12 pl-3 border-2 rounded-lg border-slate-100 text-lg text-slate-200 bg-slate-900"
-                    />
+                        className="w-full h-12 pl-3 border-2 rounded-lg border-slate-100 text-lg text-slate-200 bg-slate-900" />
                 </div>
                 <button type="submit" onClick={handleSubmit} className='w-auto h-auto px-8 py-3 bg-slate-200 rounded-lg uppercase font-semibold'>Login</button>
                 <div className='mt-3 mb-3 w-full h-[1px] bg-slate-200'></div>
