@@ -1,12 +1,12 @@
+import cors from "cors";
 import express from "express";
 import http from "http";
 import mongoose from "mongoose";
-import socketIo from "socket.io";
 import authRouter from "./routes/authRoutes.js";
 
 const app = express();
 const server = http.createServer(app);
-const io = socketIo(server);
+// const io = socketIo(server);
 
 mongoose.connect('mongodb://localhost:27017/chat-app', {
     useNewUrlParser: true,
@@ -14,6 +14,7 @@ mongoose.connect('mongodb://localhost:27017/chat-app', {
 });
 
 app.use(express.json());
+app.use(cors());
 
 app.use('/api/auth', authRouter);
 
