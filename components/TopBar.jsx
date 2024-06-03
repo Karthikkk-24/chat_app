@@ -1,11 +1,11 @@
 import PropTypes from 'prop-types';
 
-export default function TopBar({ title, members, notifications }) {
+export default function TopBar({ title, members }) {
     return (
         <div className="w-full h-18 flex items-center justify-between">
             <div className="h-full flex flex-col items-start justify-start">
                 <div className="w-auto h-auto">
-                    <h2 className='text-3xl text-slate-900'>{title}</h2>
+                    <h2 className='text-3xl font-semibold text-slate-900'>{title}</h2>
                 </div>
                 <div className="w-auto h-auto">
                     <h5 className='text-slate-900 text-lg'>{members} members</h5>
@@ -35,4 +35,9 @@ export default function TopBar({ title, members, notifications }) {
             </div>
         </div>
     );
+}
+
+TopBar.propTypes = {
+    title: PropTypes.string.isRequired,
+    members: PropTypes.number.isRequired,
 }
