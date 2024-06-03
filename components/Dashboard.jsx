@@ -8,9 +8,9 @@ export default function Dashboard() {
             <Sidebar />
             <div className="p-5 bg-primary rounded-3xl h-full w-[90%] flex items-start justify-between gap-1">
                 <div className='w-[30%] h-full flex flex-col items-start justify-start gap-2 overflow-x-hidden overflow-y-auto p-5'>
-                    <ChatItem title='General Chat' time='00:00' notifications='2' />
-                    <ChatItem title='General Chat' time='00:00' notifications='2' />
-                    <ChatItem title='General Chat' time='00:00' notifications='2' />
+                    <ChatItem title='General Chat' time='00:00' pin='true' notifications='2' />
+                    <ChatItem title='General Chat' time='00:00' pin='true' notifications='2' />
+                    <ChatItem title='General Chat' time='00:00' pin='true' notifications='2' />
                     <ChatItem title='General Chat' time='00:00' notifications='2' />
                     <ChatItem title='General Chat' time='00:00' notifications='2' />
                     <ChatItem title='General Chat' time='00:00' notifications='2' />
