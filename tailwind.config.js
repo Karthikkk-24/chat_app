@@ -9,7 +9,8 @@ export default {
         extend: {
             colors: {
                 background: "#202022",
-                primary: "#dcdce6"
+                primary: "#dcdce6",
+                highlight: "#eeeef8",
             }
         },
     },
