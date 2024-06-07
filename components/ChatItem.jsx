@@ -29,7 +29,7 @@ export default function ChatItem({ title, time, notifications, pin }) {
         }
     }
     return (
-        <div className="w-full relative border-2 bg-highlight border-slate-50 h-20 flex items-center justify-start gap-2 rounded-xl min-h-20 p-2">
+        <div className="w-full cursor-pointer relative border-2 bg-highlight border-slate-50 h-20 flex items-center justify-start gap-2 rounded-xl min-h-20 p-2">
             <div className="h-full w-auto aspect-square">
                 <img
                     src="https://i.pravatar.cc/300"

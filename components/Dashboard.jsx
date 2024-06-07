@@ -1,8 +1,44 @@
+import { useEffect, useState } from 'react';
 import ChatItem from './ChatItem';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
 export default function Dashboard() {
+
+    const [messages, setMessages] = useState("");
+    const [ws, setWs] = useState(null);
+
+    useEffect(() => {
+        // Establish WebSocket connection
+        const socket = new WebSocket('wss://your-websocket-url');
+        socket.onopen = () => {
+            console.log('WebSocket connected');
+        };
+        socket.onclose = () => {
+            console.log('WebSocket disconnected');
+        };
+        socket.onerror = (error) => {
+            console.error('WebSocket error', error);
+        };
+        setWs(socket);
+
+        // Clean up the WebSocket connection when the component is unmounted
+        return () => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.close();
+            }
+        };
+    }, []);
+
+    const handleSend = () => {
+        if (ws && ws.readyState === WebSocket.OPEN) {
+            ws.send(messages);
+            setMessages(''); // Clear the input after sending
+        } else {
+            console.error('WebSocket is not connected');
+        }
+    };
+
     return (
         <div className="bg-background h-screen w-screen flex items-center justify-between p-5">
             <Sidebar />
@@ -120,8 +156,10 @@ export default function Dashboard() {
                             type="text"
                             className="w-[70%] bg-slate-50 h-12 pl-5 rounded-full pr-5"
                             placeholder="Search"
+                            onChange={(e) => setMessages(e.target.value)}
+                            value={messages}
                         />
-                        <button className="w-12 flex items-center justify-center h-12 hover:scale-105 transition-all rounded-full bg-slate-50">
+                        <button className="w-12 flex items-center justify-center h-12 hover:scale-105 transition-all rounded-full bg-slate-50" onClick={handleSend}>
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="20"
