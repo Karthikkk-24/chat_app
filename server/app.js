@@ -2,7 +2,7 @@ import cors from "cors";
 import express from "express";
 import http from "http";
 import mongoose from "mongoose";
-import { WebSocketServer } from 'ws';
+import { WebSocket, WebSocketServer } from 'ws';
 import ChatMessage from './models/chatMessageModel.js';
 import authRouter from "./routes/authRoutes.js";
 
@@ -34,7 +34,8 @@ wss.on('connection', (ws) => {
 
         const chatMessage = new ChatMessage({
             text: parsedMessage.text,
-            timestamp: parsedMessage.timestamp
+            timestamp: parsedMessage.timestamp,
+            user: parsedMessage.user
         });
         await chatMessage.save();
 

@@ -35,9 +35,11 @@ export default function Dashboard() {
         };
     }, []);
 
+    const userDetail = localStorage.getItem("user_id");
+
     const handleSend = () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
-            const message = { text: messages, timestamp: new Date() };
+            const message = { text: messages, timestamp: new Date(), user: userDetail };
             ws.send(JSON.stringify(message));
             setMessages(''); // Clear the input after sending
         } else {
