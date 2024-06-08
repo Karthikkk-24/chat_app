@@ -51,6 +51,15 @@ wss.on('connection', (ws) => {
     });
 });
 
+app.get('/api/getChats', async (req, res) => {
+    try {
+        const chatMessages = await ChatMessage.find();
+        res.send(chatMessages);
+    } catch (error) {
+        console.log(error);
+    }
+});
+
 app.get('/something', (req, res) => {
     res.send('Something Nothing');
 })

@@ -1,16 +1,29 @@
+import axios from 'axios';
 import { useEffect, useState } from 'react';
 import ChatItem from './ChatItem';
+import Serverport from './Serverport';
 import Sidebar from './Sidebar';
 import TopBar from './TopBar';
 
 export default function Dashboard() {
-
-    const [messages, setMessages] = useState("");
+    const [messages, setMessages] = useState('');
     const [chatHistory, setChatHistory] = useState([]);
     const [ws, setWs] = useState(null);
 
+    const getChats = async () => {
+        try {
+            const response = await axios.get(`${Serverport()}/api/getChats`);
+            setChatHistory(response.data);
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     useEffect(() => {
-        
+        getChats();
+    }, [messages]);
+
+    useEffect(() => {
         const socket = new WebSocket('ws://localhost:3000');
         socket.onopen = () => {
             console.log('WebSocket connected');
@@ -21,10 +34,10 @@ export default function Dashboard() {
         socket.onerror = (error) => {
             console.error('WebSocket error', error);
         };
-        socket.onmessage = (event) => {
-            const message = JSON.parse(event.data);
-            setChatHistory((prevHistory) => [...prevHistory, message]);
-        };
+        // socket.onmessage = (event) => {
+        //     // const message = JSON.parse(event.data);
+        //     // setChatHistory((prevHistory) => [...prevHistory, message]);
+        // };
         setWs(socket);
 
         return () => {
@@ -34,11 +47,15 @@ export default function Dashboard() {
         };
     }, []);
 
-    const userDetail = localStorage.getItem("user_id");
+    const userDetail = localStorage.getItem('user_id');
 
     const handleSend = () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
-            const message = { text: messages, timestamp: new Date(), user: userDetail };
+            const message = {
+                text: messages,
+                timestamp: new Date(),
+                user: userDetail,
+            };
             ws.send(JSON.stringify(message));
             setMessages('');
         } else {
@@ -157,19 +174,46 @@ export default function Dashboard() {
                 </div>
                 <div className="w-[70%] h-full relative items-start justify-start p-5">
                     <TopBar title={'General'} members={5} />
-                    <div className=''>
+                    <div className="flex h-[40rem] justify-end flex-col gap-5">
                         {chatHistory.map((message, index) => (
-                            <div key={index} className={`flex items-center justify-start ${message.user === userDetail ? 'justify-end' : 'justify-start'}`}>
-                                <div className={`w-full flex items-center justify-start ${message.user === userDetail ? 'justify-end' : 'justify-start'}`}>
-                                    <div className={`w-10 h-10 ${message.user === userDetail ? 'bg-slate-50' : 'bg-primary'}`}>
+                            <div
+                                key={index}
+                                className={`flex items-center justify-end ${
+                                    message.user === userDetail
+                                        ? 'justify-end'
+                                        : 'justify-start'
+                                }`}
+                            >
+                                <div
+                                    className={`w-full flex items-center gap-3 justify-start ${
+                                        message.user === userDetail
+                                            ? 'justify-end'
+                                            : 'justify-start'
+                                    }`}
+                                >
+                                    <div
+                                        className={`ml-3 ${
+                                            message.user === userDetail
+                                                ? 'bg-amber-500 rounded-full w-auto h-auto px-4 py-3'
+                                                : 'bg-primary'
+                                        }`}
+                                    >
+                                        <p className="text-slate-950 text-sm">
+                                            {message.text}
+                                        </p>
+                                    </div>
+                                    <div
+                                        className={`w-10 h-10 ${
+                                            message.user === userDetail
+                                                ? ''
+                                                : 'bg-primary'
+                                        }`}
+                                    >
                                         <img
                                             src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
                                             alt="Profile"
                                             className="w-full h-full object-cover rounded-full"
                                         />
-                                    </div>
-                                    <div className={`ml-3 ${message.user === userDetail ? 'bg-slate-50' : 'bg-primary'}`}>
-                                        <p className="text-slate-50 text-sm">{message.text}</p>
                                     </div>
                                 </div>
                             </div>
@@ -183,7 +227,10 @@ export default function Dashboard() {
                             onChange={(e) => setMessages(e.target.value)}
                             value={messages}
                         />
-                        <button className="w-12 flex items-center justify-center h-12 hover:scale-105 transition-all rounded-full bg-slate-50" onClick={handleSend}>
+                        <button
+                            className="w-12 flex items-center justify-center h-12 hover:scale-105 transition-all rounded-full bg-slate-50"
+                            onClick={handleSend}
+                        >
                             <svg
                                 xmlns="http://www.w3.org/2000/svg"
                                 width="20"
