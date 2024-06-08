@@ -53,6 +53,6 @@ export default function ChatItem({ title, time, notifications, pin }) {
 ChatItem.propTypes = {
     title: PropTypes.string.isRequired,
     time: PropTypes.string.isRequired,
-    notifications: PropTypes.number.isRequired,
-    pin: PropTypes.bool.isRequired,
+    notifications: PropTypes.string.isRequired,
+    pin: PropTypes.string,
 };

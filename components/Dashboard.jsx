@@ -10,7 +10,7 @@ export default function Dashboard() {
     const [ws, setWs] = useState(null);
 
     useEffect(() => {
-        // Establish WebSocket connection
+        
         const socket = new WebSocket('ws://localhost:3000');
         socket.onopen = () => {
             console.log('WebSocket connected');
@@ -27,7 +27,6 @@ export default function Dashboard() {
         };
         setWs(socket);
 
-        // Clean up the WebSocket connection when the component is unmounted
         return () => {
             if (socket.readyState === WebSocket.OPEN) {
                 socket.close();
@@ -41,7 +40,7 @@ export default function Dashboard() {
         if (ws && ws.readyState === WebSocket.OPEN) {
             const message = { text: messages, timestamp: new Date(), user: userDetail };
             ws.send(JSON.stringify(message));
-            setMessages(''); // Clear the input after sending
+            setMessages('');
         } else {
             console.error('WebSocket is not connected');
         }
@@ -158,7 +157,24 @@ export default function Dashboard() {
                 </div>
                 <div className="w-[70%] h-full relative items-start justify-start p-5">
                     <TopBar title={'General'} members={5} />
-                    <div className=''></div>
+                    <div className=''>
+                        {chatHistory.map((message, index) => (
+                            <div key={index} className={`flex items-center justify-start ${message.user === userDetail ? 'justify-end' : 'justify-start'}`}>
+                                <div className={`w-full flex items-center justify-start ${message.user === userDetail ? 'justify-end' : 'justify-start'}`}>
+                                    <div className={`w-10 h-10 ${message.user === userDetail ? 'bg-slate-50' : 'bg-primary'}`}>
+                                        <img
+                                            src="https://cdn-icons-png.flaticon.com/512/149/149071.png"
+                                            alt="Profile"
+                                            className="w-full h-full object-cover rounded-full"
+                                        />
+                                    </div>
+                                    <div className={`ml-3 ${message.user === userDetail ? 'bg-slate-50' : 'bg-primary'}`}>
+                                        <p className="text-slate-50 text-sm">{message.text}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
                     <div className="absolute bottom-5 left-1/2 translate-x-[-50%] flex items-center w-full justify-center gap-10">
                         <input
                             type="text"
