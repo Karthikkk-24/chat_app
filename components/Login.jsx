@@ -27,6 +27,7 @@ export default function Login() {
                 console.log(response.data);
                 localStorage.clear();
                 localStorage.setItem('user', response.data.token);
+                localStorage.setItem('user_id', response.data.user.uniqueId);
                 window.location.href = '/dashboard';
             }
 

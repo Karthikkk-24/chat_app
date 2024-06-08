@@ -6,11 +6,12 @@ import TopBar from './TopBar';
 export default function Dashboard() {
 
     const [messages, setMessages] = useState("");
+    const [chatHistory, setChatHistory] = useState([]);
     const [ws, setWs] = useState(null);
 
     useEffect(() => {
         // Establish WebSocket connection
-        const socket = new WebSocket('wss://your-websocket-url');
+        const socket = new WebSocket('ws://localhost:3000');
         socket.onopen = () => {
             console.log('WebSocket connected');
         };
@@ -19,6 +20,10 @@ export default function Dashboard() {
         };
         socket.onerror = (error) => {
             console.error('WebSocket error', error);
+        };
+        socket.onmessage = (event) => {
+            const message = JSON.parse(event.data);
+            setChatHistory((prevHistory) => [...prevHistory, message]);
         };
         setWs(socket);
 
@@ -32,7 +37,8 @@ export default function Dashboard() {
 
     const handleSend = () => {
         if (ws && ws.readyState === WebSocket.OPEN) {
-            ws.send(messages);
+            const message = { text: messages, timestamp: new Date() };
+            ws.send(JSON.stringify(message));
             setMessages(''); // Clear the input after sending
         } else {
             console.error('WebSocket is not connected');

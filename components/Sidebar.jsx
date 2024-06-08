@@ -1,4 +1,10 @@
 export default function Sidebar() {
+
+    const handleLogout = () => {
+        localStorage.clear();
+        window.location.href = '/login';
+    }
+
     return (
         <div className="h-full w-[10%] bg-background max-w-70 flex items-center flex-col gap-10 justify-center p-5">
             <div className="w-auto h-auto p-2 aspect-square rounded-xl bg-slate-900 hover:scale-105 transition-all">
@@ -39,7 +45,7 @@ export default function Sidebar() {
                     <path d="M6.168 18.849a4 4 0 0 1 3.832 -2.849h4a4 4 0 0 1 3.834 2.855" />
                 </svg>
             </div>
-            <div className="w-auto h-auto p-2 aspect-square rounded-xl bg-slate-900 hover:scale-105 transition-all">
+            <div onClick={handleLogout} className="w-auto h-auto p-2 aspect-square rounded-xl bg-slate-900 hover:scale-105 transition-all">
                 <svg
                     xmlns="http://www.w3.org/2000/svg"
                     width="40"

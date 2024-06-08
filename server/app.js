@@ -3,6 +3,7 @@ import express from "express";
 import http from "http";
 import mongoose from "mongoose";
 import { WebSocketServer } from 'ws';
+import ChatMessage from './models/chatMessageModel.js';
 import authRouter from "./routes/authRoutes.js";
 
 const app = express();
@@ -26,11 +27,19 @@ app.get('/', (req, res) => {
 wss.on('connection', (ws) => {
     console.log('New client connected');
 
-    ws.on('message', (message) => {
+    ws.on('message', async (message) => {
         console.log('Received:', message);
-        // Broadcast the message to all clients
+
+        const parsedMessage = JSON.parse(message);
+
+        const chatMessage = new ChatMessage({
+            text: parsedMessage.text,
+            timestamp: parsedMessage.timestamp
+        });
+        await chatMessage.save();
+
         wss.clients.forEach(client => {
-            if (client !== ws && client.readyState === WebSocket.OPEN) {
+            if (client.readyState === WebSocket.OPEN) {
                 client.send(message);
             }
         });
