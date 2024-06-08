@@ -10,18 +10,18 @@ export default function Dashboard() {
     const [chatHistory, setChatHistory] = useState([]);
     const [ws, setWs] = useState(null);
 
-    const getChats = async () => {
-        try {
-            const response = await axios.get(`${Serverport()}/api/getChats`);
-            setChatHistory(response.data);
-        } catch (error) {
-            console.log(error);
-        }
-    };
+    // const getChats = async () => {
+    //     try {
+    //         const response = await axios.get(`${Serverport()}/api/getChats`);
+    //         // setChatHistory(response.data);
+    //     } catch (error) {
+    //         console.log(error);
+    //     }
+    // };
 
-    useEffect(() => {
-        getChats();
-    }, [messages]);
+    // useEffect(() => {
+    //     // getChats();
+    // }, [messages]);
 
     useEffect(() => {
         const socket = new WebSocket(`ws://192.168.0.104:3000`);
@@ -35,11 +35,11 @@ export default function Dashboard() {
             console.error('WebSocket error', error);
         };
         socket.onmessage = (event) => {
-            // const message = JSON.parse(event.data);
-            // console.log(event.data);
+            const message = JSON.parse(event.data);
+            console.log(event.data);
             // const response = await axios.get(`${Serverport()}/api/getChats`);
             // setChatHistory(response.data);
-            // setChatHistory((prevHistory) => [...prevHistory, message]);
+            setChatHistory((prevHistory) => [...prevHistory, message]);
         };
         setWs(socket);
 
