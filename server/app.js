@@ -60,9 +60,11 @@ app.get('/api/getChats', async (req, res) => {
     }
 });
 
+const ipAddress = "192.168.0.104";
+
 app.get('/something', (req, res) => {
     res.send('Something Nothing');
 })
 
 const PORT = 3000;
-server.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+server.listen(PORT, ipAddress, () => console.log(`Server running on port ${PORT}`));

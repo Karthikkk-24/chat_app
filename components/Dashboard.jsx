@@ -24,7 +24,7 @@ export default function Dashboard() {
     }, [messages]);
 
     useEffect(() => {
-        const socket = new WebSocket('ws://localhost:3000');
+        const socket = new WebSocket(`ws://192.168.0.104:3000`);
         socket.onopen = () => {
             console.log('WebSocket connected');
         };
@@ -34,10 +34,13 @@ export default function Dashboard() {
         socket.onerror = (error) => {
             console.error('WebSocket error', error);
         };
-        // socket.onmessage = (event) => {
-        //     // const message = JSON.parse(event.data);
-        //     // setChatHistory((prevHistory) => [...prevHistory, message]);
-        // };
+        socket.onmessage = (event) => {
+            // const message = JSON.parse(event.data);
+            // console.log(event.data);
+            // const response = await axios.get(`${Serverport()}/api/getChats`);
+            // setChatHistory(response.data);
+            // setChatHistory((prevHistory) => [...prevHistory, message]);
+        };
         setWs(socket);
 
         return () => {
