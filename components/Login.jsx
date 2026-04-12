@@ -1,82 +1,111 @@
 import axios from 'axios';
+import { Lock, LogIn, Mail } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import Serverport from './Serverport';
 
 export default function Login() {
+    const [email, setEmail] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
-        if (localStorage.getItem('user')) {
+        if (localStorage.getItem('token')) {
             window.location.href = '/dashboard';
         }
     }, []);
 
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-
-    const handleSubmit = async() => {
+    const handleSubmit = async (e) => {
+        e?.preventDefault();
+        setError('');
+        setLoading(true);
         try {
             const response = await axios.post(`${Serverport()}/api/auth/login`, {
                 email,
-                password
+                password,
             });
-
-            console.log(response.data);
-
             if (response.status === 200) {
-                console.log(response.data);
-                localStorage.clear();
-                localStorage.setItem('user', response.data.token);
-                localStorage.setItem('user_id', response.data.user.uniqueId);
+                localStorage.setItem('token', response.data.token);
+                localStorage.setItem('user', JSON.stringify(response.data.user));
                 window.location.href = '/dashboard';
             }
-
-        } catch (error) {
-            console.log(error);
+        } catch (err) {
+            setError(err.response?.data?.message || 'Something went wrong');
+        } finally {
+            setLoading(false);
         }
-    }
-
+    };
 
     return (
-        <div className="h-screen w-screen bg-slate-900 flex items-center flex-col justify-center">
-            <div className="shadow-xl bg-slate-950 w-[30vw] h-auto min-w-[30rem] p-10 flex flex-col items-center rounded-2xl justify-center gap-5">
-                <h3 className="text-center uppercase text-3xl text-gray-50">
-                    Login
-                </h3>
-                <div className="flex flex-col items-start justify-start gap-1 w-full">
-                    <label
-                        htmlFor="email"
-                        className="text-slate-200 text-left text-sm"
-                    >
-                        Email
-                    </label>
-                    <input
-                        type="email"
-                        id="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        className="w-full h-12 pl-3 border-2 rounded-lg border-slate-100 text-lg text-slate-200 bg-slate-900"
-                    />
+        <div className="h-screen w-screen bg-onyx flex items-center justify-center">
+            <div className="w-full max-w-md px-8">
+                <div className="mb-10 text-center">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-accent/10 mb-6">
+                        <LogIn className="w-7 h-7 text-accent" />
+                    </div>
+                    <h1 className="text-2xl font-semibold text-text-primary">Welcome back</h1>
+                    <p className="text-text-secondary text-sm mt-2">Sign in to continue to your chats</p>
                 </div>
-                <div className="flex flex-col items-start justify-start gap-1 w-full">
-                    <label
-                        htmlFor="password"
-                        className="text-slate-200 text-left text-sm"
+
+                {error && (
+                    <div className="mb-5 px-4 py-3 rounded-lg bg-red-500/10 border border-red-500/20 text-red-400 text-sm">
+                        {error}
+                    </div>
+                )}
+
+                <form onSubmit={handleSubmit} className="space-y-5">
+                    <div>
+                        <label htmlFor="email" className="block text-text-secondary text-xs font-medium mb-2 uppercase tracking-wider">
+                            Email
+                        </label>
+                        <div className="relative">
+                            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                            <input
+                                type="email"
+                                id="email"
+                                value={email}
+                                onChange={(e) => setEmail(e.target.value)}
+                                className="w-full h-11 pl-10 pr-4 rounded-lg bg-surface border border-border text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                                placeholder="you@example.com"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label htmlFor="password" className="block text-text-secondary text-xs font-medium mb-2 uppercase tracking-wider">
+                            Password
+                        </label>
+                        <div className="relative">
+                            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
+                            <input
+                                type="password"
+                                id="password"
+                                value={password}
+                                onChange={(e) => setPassword(e.target.value)}
+                                className="w-full h-11 pl-10 pr-4 rounded-lg bg-surface border border-border text-text-primary text-sm placeholder:text-text-muted focus:outline-none focus:border-accent focus:ring-1 focus:ring-accent transition-colors"
+                                placeholder="Enter your password"
+                                required
+                            />
+                        </div>
+                    </div>
+
+                    <button
+                        type="submit"
+                        disabled={loading}
+                        className="w-full h-11 bg-accent hover:bg-accent-hover text-white font-medium text-sm rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     >
-                        Password
-                    </label>
-                    <input
-                        type="password"
-                        id="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        className="w-full h-12 pl-3 border-2 rounded-lg border-slate-100 text-lg text-slate-200 bg-slate-900"
-                    />
+                        {loading ? 'Signing in...' : 'Sign in'}
+                    </button>
+                </form>
+
+                <div className="mt-8 text-center">
+                    <span className="text-text-muted text-sm">Don&apos;t have an account? </span>
+                    <Link to="/register" className="text-accent text-sm font-medium hover:text-accent-light transition-colors">
+                        Create one
+                    </Link>
                 </div>
-                <button type="submit" onClick={handleSubmit} className='w-auto h-auto px-8 py-3 bg-slate-200 rounded-lg uppercase font-semibold'>Login</button>
-                <div className='mt-3 mb-3 w-full h-[1px] bg-slate-200'></div>
-                <p className='text-slate-200'>Don&apos;t have an account?</p>
-                <Link className='text-slate-200 text-lg underline underline-offset-8' to="/register">Register</Link>
             </div>
         </div>
     );

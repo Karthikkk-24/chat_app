@@ -1,85 +1,82 @@
 import bcrypt from 'bcryptjs';
+import crypto from 'crypto';
 import express from 'express';
 import authTokenModel from '../models/authTokenModel.js';
+import Conversation from '../models/conversationModel.js';
 import User from '../models/userModel.js';
 
 const authRouter = express.Router();
 
-async function createUniqueId () {
-    let uniqueId = Math.random().toString(36).substr(2, 9);
-    const existingUser = await User.findOne({ uniqueId });
-    if (existingUser) {
-        return createUniqueId();
-    }
+async function createUniqueId() {
+    const uniqueId = crypto.randomBytes(5).toString('hex');
+    const existing = await User.findOne({ uniqueId });
+    if (existing) return createUniqueId();
     return uniqueId;
 }
 
-async function createUserAuthToken (user) {
-    const token = generateAuthToken(user);
+async function generateAuthToken(user) {
+    const token = crypto.randomBytes(30).toString('hex');
+    const existing = await authTokenModel.findOne({ token });
+    if (existing) return generateAuthToken(user);
+    await new authTokenModel({ token, user: user._id }).save();
     return token;
 }
 
-function generateRandomString(length) {
-    const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-    let result = '';
-    for (let i = 0; i < length; i++) {
-        const randomIndex = Math.floor(Math.random() * characters.length);
-        result += characters.charAt(randomIndex);
-    }
-    return result;
-}
-
-async function generateAuthToken(user) {
-    const authToken = generateRandomString(30);
-
-    const checkAuthToken = async () => {
-        const existingToken = await authTokenModel.findOne({ token: authToken });
-        if (existingToken) {
-            return generateAuthToken();
-        } else {
-            const newAuthToken = new authTokenModel({ token: authToken, user: user._id });
-            await newAuthToken.save();
-            return authToken;
+export async function authMiddleware(req, res, next) {
+    try {
+        const authHeader = req.headers.authorization;
+        if (!authHeader || !authHeader.startsWith('Bearer ')) {
+            return res.status(401).json({ message: 'No token provided' });
         }
-    };
-
-    return checkAuthToken();
-}
-
-function getFormattedDate() {
-    const date = new Date();
-    const year = date.getFullYear();
-    const month = String(date.getMonth() + 1).padStart(2, '0');
-    const day = String(date.getDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+        const token = authHeader.split(' ')[1];
+        const authToken = await authTokenModel.findOne({ token });
+        if (!authToken) {
+            return res.status(401).json({ message: 'Invalid token' });
+        }
+        const user = await User.findById(authToken.user).select('-password');
+        if (!user) {
+            return res.status(401).json({ message: 'User not found' });
+        }
+        req.user = user;
+        next();
+    } catch (err) {
+        console.error('Auth middleware error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
 }
 
 authRouter.post('/register', async (req, res) => {
     const { username, email, password } = req.body;
 
     try {
-        console.log('req.body', req.body);
+        if (!username || !email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
         const existingUser = await User.findOne({ email });
         if (existingUser) {
             return res.status(400).json({ message: 'User already exists' });
         }
 
         const uniqueId = await createUniqueId();
-        console.log('uniqueId', uniqueId);
-
         const hashedPassword = await bcrypt.hash(password, 10);
         const newUser = new User({
             username,
             email,
             password: hashedPassword,
             uniqueId,
-            createdAt: getFormattedDate()
         });
-
         await newUser.save();
-        res.status(201).json(newUser);
+
+        const generalChat = await Conversation.findOne({ name: 'General' });
+        if (generalChat) {
+            generalChat.participants.push(newUser._id);
+            await generalChat.save();
+        }
+
+        res.status(201).json({ message: 'Registration successful' });
     } catch (err) {
-        console.log(err);
+        console.error('Register error:', err);
         res.status(500).json({ message: 'Server error' });
     }
 });
@@ -88,6 +85,10 @@ authRouter.post('/login', async (req, res) => {
     const { email, password } = req.body;
 
     try {
+        if (!email || !password) {
+            return res.status(400).json({ message: 'All fields are required' });
+        }
+
         const user = await User.findOne({ email });
         if (!user) {
             return res.status(400).json({ message: 'Invalid credentials' });
@@ -98,14 +99,31 @@ authRouter.post('/login', async (req, res) => {
             return res.status(400).json({ message: 'Invalid credentials' });
         }
 
-        const token = await createUserAuthToken(user);
-        console.log('token', token);
+        const token = await generateAuthToken(user);
 
-        res.status(200).json({ message: 'Login successful', user, token });
+        res.status(200).json({
+            message: 'Login successful',
+            token,
+            user: {
+                _id: user._id,
+                username: user.username,
+                email: user.email,
+                uniqueId: user.uniqueId,
+            }
+        });
     } catch (err) {
-        console.log(err);
+        console.error('Login error:', err);
         res.status(500).json({ message: 'Server error' });
     }
+});
+
+authRouter.get('/me', authMiddleware, async (req, res) => {
+    res.json({
+        _id: req.user._id,
+        username: req.user.username,
+        email: req.user.email,
+        uniqueId: req.user.uniqueId,
+    });
 });
 
 export default authRouter;
