@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { Search, Send } from 'lucide-react';
+import { Menu, Search, Send } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import ChatItem from './ChatItem';
 import Serverport, { getWsUrl } from './Serverport';
@@ -14,6 +14,8 @@ export default function Dashboard() {
     const [currentUser, setCurrentUser] = useState(null);
     const [ws, setWs] = useState(null);
     const [searchQuery, setSearchQuery] = useState('');
+    const [sidebarOpen, setSidebarOpen] = useState(false);
+    const [mobileShowChat, setMobileShowChat] = useState(false);
     const messagesEndRef = useRef(null);
     const chatContainerRef = useRef(null);
 
@@ -131,6 +133,11 @@ export default function Dashboard() {
         setActiveConversation(conv);
         setChatHistory([]);
         loadMessages(conv._id);
+        setMobileShowChat(true);
+    };
+
+    const handleMobileBack = () => {
+        setMobileShowChat(false);
     };
 
     const filteredConversations = conversations.filter((c) =>
@@ -144,12 +151,23 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="bg-onyx h-screen w-screen flex">
-            <Sidebar />
+        <div className="bg-onyx h-[100dvh] w-screen flex overflow-hidden">
+            <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
-            <div className="w-72 h-full bg-surface border-r border-border/50 flex flex-col shrink-0">
-                <div className="p-4 border-b border-border/50">
-                    <div className="relative">
+            {/* Conversation list — full width on mobile, fixed 288px on desktop */}
+            <div className={`
+                h-full bg-surface flex flex-col shrink-0 border-r border-border/50
+                w-full md:w-72
+                ${mobileShowChat ? 'hidden md:flex' : 'flex'}
+            `}>
+                <div className="p-3 md:p-4 border-b border-border/50 flex items-center gap-3">
+                    <button
+                        onClick={() => setSidebarOpen(true)}
+                        className="w-9 h-9 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-card transition-colors shrink-0 md:hidden"
+                    >
+                        <Menu className="w-5 h-5" />
+                    </button>
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-text-muted" />
                         <input
                             type="text"
@@ -177,17 +195,22 @@ export default function Dashboard() {
                 </div>
             </div>
 
-            <div className="flex-1 h-full flex flex-col bg-onyx">
+            {/* Chat area — full width on mobile when selected, flex-1 on desktop */}
+            <div className={`
+                flex-1 h-full flex flex-col bg-onyx min-w-0
+                ${mobileShowChat ? 'flex' : 'hidden md:flex'}
+            `}>
                 {activeConversation ? (
                     <>
                         <TopBar
                             title={activeConversation.name}
                             members={activeConversation.participants?.length || 0}
+                            onBack={handleMobileBack}
                         />
 
                         <div
                             ref={chatContainerRef}
-                            className="flex-1 overflow-y-auto px-5 py-4 space-y-1"
+                            className="flex-1 overflow-y-auto px-4 md:px-5 py-4 space-y-1"
                         >
                             {chatHistory.map((msg, idx) => {
                                 const isMe = msg.senderId === currentUser?._id;
@@ -202,7 +225,7 @@ export default function Dashboard() {
                                         )}
                                         <div className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
                                             <div
-                                                className={`max-w-[70%] px-3.5 py-2 rounded-2xl text-sm ${
+                                                className={`max-w-[85%] md:max-w-[70%] px-3.5 py-2 rounded-2xl text-sm ${
                                                     isMe
                                                         ? 'bg-accent text-white rounded-br-md'
                                                         : 'bg-surface text-text-primary rounded-bl-md'
@@ -220,11 +243,11 @@ export default function Dashboard() {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        <div className="px-5 pb-5 pt-2">
-                            <div className="flex items-center gap-3 bg-surface border border-border/50 rounded-xl px-4 py-2 focus-within:border-accent/50 transition-colors">
+                        <div className="px-3 md:px-5 pb-4 md:pb-5 pt-2 shrink-0">
+                            <div className="flex items-center gap-2 md:gap-3 bg-surface border border-border/50 rounded-xl px-3 md:px-4 py-2 focus-within:border-accent/50 transition-colors">
                                 <input
                                     type="text"
-                                    className="flex-1 bg-transparent text-text-primary text-sm placeholder:text-text-muted focus:outline-none"
+                                    className="flex-1 bg-transparent text-text-primary text-sm placeholder:text-text-muted focus:outline-none min-w-0"
                                     placeholder="Type a message..."
                                     value={messageText}
                                     onChange={(e) => setMessageText(e.target.value)}
