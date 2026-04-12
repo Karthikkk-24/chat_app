@@ -104,7 +104,7 @@ export default function Dashboard() {
 
         setWs(socket);
         return () => {
-            if (socket.readyState === WebSocket.OPEN) socket.close();
+            socket.close();
         };
     }, []);
 
