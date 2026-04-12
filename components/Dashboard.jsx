@@ -151,7 +151,7 @@ export default function Dashboard() {
     };
 
     return (
-        <div className="bg-onyx h-[100dvh] w-screen flex overflow-hidden">
+        <div className="bg-onyx fixed inset-0 flex overflow-hidden">
             <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
 
             {/* Conversation list — full width on mobile, fixed 288px on desktop */}
@@ -206,6 +206,7 @@ export default function Dashboard() {
                             title={activeConversation.name}
                             members={activeConversation.participants?.length || 0}
                             onBack={handleMobileBack}
+                            onMenu={() => setSidebarOpen(true)}
                         />
 
                         <div
@@ -243,7 +244,7 @@ export default function Dashboard() {
                             <div ref={messagesEndRef} />
                         </div>
 
-                        <div className="px-3 md:px-5 pb-4 md:pb-5 pt-2 shrink-0">
+                        <div className="px-3 md:px-5 pb-2 md:pb-5 pt-2 shrink-0">
                             <div className="flex items-center gap-2 md:gap-3 bg-surface border border-border/50 rounded-xl px-3 md:px-4 py-2 focus-within:border-accent/50 transition-colors">
                                 <input
                                     type="text"
