@@ -8,17 +8,17 @@ export default {
     theme: {
         extend: {
             colors: {
-                onyx: "#0a0a0f",
-                surface: "#111118",
-                card: "#1a1a2e",
-                "card-hover": "#222240",
-                accent: "#3b82f6",
-                "accent-hover": "#2563eb",
-                "accent-light": "#60a5fa",
-                border: "#1e293b",
-                "text-primary": "#e2e8f0",
-                "text-secondary": "#94a3b8",
-                "text-muted": "#64748b",
+                onyx: "var(--color-onyx)",
+                surface: "var(--color-surface)",
+                card: "var(--color-card)",
+                "card-hover": "var(--color-card-hover)",
+                accent: "var(--color-accent)",
+                "accent-hover": "var(--color-accent-hover)",
+                "accent-light": "var(--color-accent-light)",
+                border: "var(--color-border)",
+                "text-primary": "var(--color-text-primary)",
+                "text-secondary": "var(--color-text-secondary)",
+                "text-muted": "var(--color-text-muted)",
             }
         },
     },

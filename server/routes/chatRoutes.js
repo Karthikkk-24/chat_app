@@ -1,6 +1,7 @@
 import express from 'express';
 import Conversation from '../models/conversationModel.js';
 import Message from '../models/messageModel.js';
+import User from '../models/userModel.js';
 import { authMiddleware } from './authRoutes.js';
 
 const chatRouter = express.Router();
@@ -9,7 +10,7 @@ chatRouter.get('/conversations', authMiddleware, async (req, res) => {
     try {
         const conversations = await Conversation.find({
             participants: req.user._id
-        }).sort({ updatedAt: -1 }).populate('participants', 'username uniqueId');
+        }).sort({ updatedAt: -1 }).populate('participants', 'username uniqueId avatarColor avatarUrl isOnline lastSeen');
         res.json(conversations);
     } catch (err) {
         console.error(err);
@@ -19,14 +20,20 @@ chatRouter.get('/conversations', authMiddleware, async (req, res) => {
 
 chatRouter.post('/conversations', authMiddleware, async (req, res) => {
     try {
-        const { name } = req.body;
+        const { name, participantIds } = req.body;
+        const participants = [req.user._id, ...(participantIds || [])];
+        const uniqueParticipants = [...new Set(participants.map(String))];
+
         const conversation = new Conversation({
             name: name || 'New Chat',
-            participants: [req.user._id],
+            participants: uniqueParticipants,
+            isGroup: uniqueParticipants.length > 2,
+            createdBy: req.user._id,
             updatedAt: new Date()
         });
         await conversation.save();
-        res.status(201).json(conversation);
+        const populated = await conversation.populate('participants', 'username uniqueId avatarColor avatarUrl isOnline lastSeen');
+        res.status(201).json(populated);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });
@@ -56,6 +63,25 @@ chatRouter.get('/messages/:conversationId', authMiddleware, async (req, res) => 
     }
 });
 
+chatRouter.get('/messages/:conversationId/search', authMiddleware, async (req, res) => {
+    try {
+        const { conversationId } = req.params;
+        const { q } = req.query;
+        if (!q) return res.json([]);
+
+        const messages = await Message.find({
+            conversationId,
+            deleted: { $ne: true },
+            text: { $regex: q, $options: 'i' }
+        }).sort({ createdAt: -1 }).limit(20).lean();
+
+        res.json(messages.reverse());
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
 chatRouter.post('/join/:conversationId', authMiddleware, async (req, res) => {
     try {
         const { conversationId } = req.params;
@@ -68,6 +94,18 @@ chatRouter.post('/join/:conversationId', authMiddleware, async (req, res) => {
             await conversation.save();
         }
         res.json(conversation);
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ message: 'Server error' });
+    }
+});
+
+chatRouter.get('/users', authMiddleware, async (req, res) => {
+    try {
+        const users = await User.find({ _id: { $ne: req.user._id } })
+            .select('username uniqueId avatarColor avatarUrl isOnline lastSeen')
+            .sort({ username: 1 });
+        res.json(users);
     } catch (err) {
         console.error(err);
         res.status(500).json({ message: 'Server error' });

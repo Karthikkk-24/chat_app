@@ -18,6 +18,22 @@ const UserSchema = new mongoose.Schema({
         type: String,
         required: true
     },
+    avatarColor: {
+        type: String,
+        default: '#3b82f6'
+    },
+    avatarUrl: {
+        type: String,
+        default: ''
+    },
+    isOnline: {
+        type: Boolean,
+        default: false
+    },
+    lastSeen: {
+        type: Date,
+        default: Date.now
+    },
     createdAt: {
         type: Date,
         default: Date.now

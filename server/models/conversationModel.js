@@ -4,6 +4,8 @@ const ConversationSchema = new mongoose.Schema({
     name: { type: String, required: true },
     participants: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User' }],
     lastMessage: { type: String, default: '' },
+    isGroup: { type: Boolean, default: true },
+    createdBy: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
     updatedAt: { type: Date, default: Date.now }
 });
 

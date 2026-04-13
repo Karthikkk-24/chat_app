@@ -123,7 +123,39 @@ authRouter.get('/me', authMiddleware, async (req, res) => {
         username: req.user.username,
         email: req.user.email,
         uniqueId: req.user.uniqueId,
+        avatarColor: req.user.avatarColor,
+        avatarUrl: req.user.avatarUrl,
+        isOnline: req.user.isOnline,
+        lastSeen: req.user.lastSeen,
     });
+});
+
+authRouter.put('/profile', authMiddleware, async (req, res) => {
+    try {
+        const { username, email, avatarColor, avatarUrl } = req.body;
+        const updates = {};
+        if (username) updates.username = username;
+        if (email) {
+            const existing = await User.findOne({ email, _id: { $ne: req.user._id } });
+            if (existing) return res.status(400).json({ message: 'Email already taken' });
+            updates.email = email;
+        }
+        if (avatarColor) updates.avatarColor = avatarColor;
+        if (avatarUrl !== undefined) updates.avatarUrl = avatarUrl;
+
+        const user = await User.findByIdAndUpdate(req.user._id, updates, { new: true }).select('-password');
+        res.json({
+            _id: user._id,
+            username: user.username,
+            email: user.email,
+            uniqueId: user.uniqueId,
+            avatarColor: user.avatarColor,
+            avatarUrl: user.avatarUrl,
+        });
+    } catch (err) {
+        console.error('Profile update error:', err);
+        res.status(500).json({ message: 'Server error' });
+    }
 });
 
 export default authRouter;

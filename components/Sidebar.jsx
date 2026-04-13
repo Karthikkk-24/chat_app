@@ -1,6 +1,9 @@
-import { LogOut, MessageSquare, Settings, X } from 'lucide-react';
+import { LogOut, MessageSquare, Moon, Sun, User, X } from 'lucide-react';
+import { useTheme } from './ThemeContext';
 
-export default function Sidebar({ open, onClose }) {
+export default function Sidebar({ open, onClose, onProfileOpen }) {
+    const { theme, toggleTheme } = useTheme();
+
     const handleLogout = () => {
         localStorage.clear();
         window.location.href = '/login';
@@ -31,9 +34,13 @@ export default function Sidebar({ open, onClose }) {
                     </div>
                 </div>
                 <div className="flex flex-col gap-2">
-                    <button className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-card transition-colors text-sm">
-                        <Settings className="w-4 h-4" />
-                        Settings
+                    <button onClick={() => { onProfileOpen?.(); onClose(); }} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-card transition-colors text-sm">
+                        <User className="w-4 h-4" />
+                        Profile
+                    </button>
+                    <button onClick={toggleTheme} className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-text-muted hover:text-text-primary hover:bg-card transition-colors text-sm">
+                        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+                        {theme === 'dark' ? 'Light Mode' : 'Dark Mode'}
                     </button>
                     <button
                         onClick={handleLogout}
@@ -52,12 +59,16 @@ export default function Sidebar({ open, onClose }) {
                     </div>
                 </div>
                 <div className="flex flex-col items-center gap-3">
-                    <button className="w-9 h-9 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface transition-colors">
-                        <Settings className="w-4 h-4" />
+                    <button onClick={() => onProfileOpen?.()} className="w-9 h-9 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface transition-colors" title="Profile">
+                        <User className="w-4 h-4" />
+                    </button>
+                    <button onClick={toggleTheme} className="w-9 h-9 rounded-lg flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-surface transition-colors" title="Toggle theme">
+                        {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
                     </button>
                     <button
                         onClick={handleLogout}
                         className="w-9 h-9 rounded-lg flex items-center justify-center text-text-muted hover:text-red-400 hover:bg-red-500/10 transition-colors"
+                        title="Logout"
                     >
                         <LogOut className="w-4 h-4" />
                     </button>
