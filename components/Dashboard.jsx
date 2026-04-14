@@ -57,6 +57,7 @@ export default function Dashboard() {
     const chatContainerRef = useRef(null);
     const wsRef = useRef(null);
     const reconnectTimer = useRef(null);
+    const intentionalClose = useRef(false);
     const typingTimer = useRef(null);
     const fileInputRef = useRef(null);
     const inputRef = useRef(null);
@@ -113,6 +114,15 @@ export default function Dashboard() {
     // ─── WebSocket with Auto-Reconnect ───
     const connectWs = useCallback(() => {
         if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+
+        // Close any existing socket before creating a new one
+        if (wsRef.current) {
+            intentionalClose.current = true;
+            wsRef.current.close();
+            wsRef.current = null;
+        }
+        intentionalClose.current = false;
+
         const socket = new WebSocket(getWsUrl());
 
         socket.onopen = () => {
@@ -123,7 +133,10 @@ export default function Dashboard() {
 
         socket.onclose = () => {
             setWsConnected(false);
-            reconnectTimer.current = setTimeout(connectWs, 3000);
+            // Only auto-reconnect if this wasn't a deliberate close
+            if (!intentionalClose.current) {
+                reconnectTimer.current = setTimeout(connectWs, 3000);
+            }
         };
 
         socket.onerror = () => setWsConnected(false);
@@ -135,8 +148,10 @@ export default function Dashboard() {
 
                 if (data.type === 'message') {
                     setChatHistory(prev => {
-                        if (data.conversationId === activeConvRef.current?._id) return [...prev, data];
-                        return prev;
+                        if (data.conversationId !== activeConvRef.current?._id) return prev;
+                        // Deduplicate by _id
+                        if (data._id && prev.some(m => m._id === data._id)) return prev;
+                        return [...prev, data];
                     });
                     setConversations(prev => prev.map(c =>
                         c._id === data.conversationId ? { ...c, lastMessage: data.text || 'Sent a file', updatedAt: data.createdAt } : c
@@ -189,6 +204,7 @@ export default function Dashboard() {
         connectWs();
         return () => {
             if (reconnectTimer.current) clearTimeout(reconnectTimer.current);
+            intentionalClose.current = true;
             wsRef.current?.close();
         };
         // eslint-disable-next-line react-hooks/exhaustive-deps
